@@ -250,19 +250,25 @@ chmod 644 "/etc/group"
 chown root:root "/etc/group-"
 chmod 644 "/etc/group-"
 
-#* shadow file
-chown root:shadow "/etc/shadow"
+#* (g)shadow files. Try root:shadow. Fallback root:root
+if grep -E "^shadow" "/etc/group"; then
+    chown root:shadow "/etc/shadow"
+    chown root:shadow "/etc/shadow-"
+    chown root:shadow "/etc/gshadow"
+    chown root:shadow "/etc/gshadow-"
+
+else
+    chown root:root "/etc/shadow"
+    chown root:root "/etc/shadow-"
+    chown root:root "/etc/gshadow"
+    chown root:root "/etc/gshadow-"
+fi
+
 chmod 640 "/etc/shadow"
-
-chown root:shadow "/etc/shadow-"
 chmod 640 "/etc/shadow-"
-
-#* gshadow file
-chown root:shadow "/etc/gshadow"
 chmod 640 "/etc/gshadow"
-
-chown root:shadow "/etc/gshadow-"
 chmod 640 "/etc/gshadow-"
+
 
 #* sudoers file and directory
 chown root:root "/etc/sudoers"
