@@ -58,7 +58,7 @@ error="${red}[#] ${nocolor}"
 ########
 
 # SET THIS WITH THE NEW BATCH PASSWORD!
-password_change="Password2@"
+password_change="Password1!"
 
 ########
 # Reminder Flags
@@ -282,7 +282,7 @@ chown -R root:root "/etc/sudoers.d/"
 chmod -R 440 "/etc/sudoers.d/"
 cp -r "/etc/sudoers.d/" "/etc/sudoers.d-/"
 
-if grep -E "^.includedir" "/etc/sudoers"; then 
+if grep -E "^.includedir" "/etc/sudoers" 2>/dev/null; then 
     echo -e "${warn}Located an included sudoers directory."
     if confirm "${prompt}Remove includedir statement from sudoers?"; then
         sed -i '/includedir/d' /etc/sudoers
@@ -314,7 +314,7 @@ if confirm "${prompt}Have you provided a user list already?"; then
             #DEBUG
             echo -e "${warn}Checking user from good with current list"
             if [[ "${good_users[g]}" == "${current_users[c]}" ]]; then
-                echo "${good}User ${good_users[g]} found!"
+                echo -e "${good}User ${good_users[g]} found!"
                 unset "good_users[g]"
                 unset "current_users[c]"
                 break
@@ -323,7 +323,7 @@ if confirm "${prompt}Have you provided a user list already?"; then
     done
     echo -e "${good}Users have been compared. Current statistics below v"
     echo -e "${warn}Missing ${green}good${nocolor} users:" "${good_users[@]}"
-    echo -e "${warn}Extra ${red}shell${nocolor} users:" "${current_users[@]}"
+    echo -e "${warn}${red}Unauthorized${nocolor} shell users:" "${current_users[@]}"
 
     echo -e "${good}Adding missing users from userlist!"
     for u in "${good_users[@]}"; do
