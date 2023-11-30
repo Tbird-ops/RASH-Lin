@@ -262,7 +262,7 @@ if confirm "${prompt}Remove includedir statement from sudoers?"; then
     sed -i '/includedir/d'
     echo -e "${warn}Removed includedir statements from active sudoers file"
 fi
-echo -e "${good}Finished with common account configuration files
+echo -e "${good}Finished with common account configuration files"
 
 #########
 # Fix Users
@@ -273,7 +273,52 @@ echo -e "${good}Moving onto User Auditing"
 
 #* Collect roster of current existing shell users
 if confirm "${prompt}Have you provided a user list already?"; then
-    
+    #########
+    # Concept: Verify good users are in current.
+    #          Remaining good users will be added
+    #          Remaining current users will be removed.
+    #########
+    good_users=($(sort -u userlist.txt))
+    current_users=($(cat /etc/passwd | grep -v root | grep -E "/bin/.*sh" | cut -d: -f1 | sort -u))
+    #DEBUG
+    echo -e "${warn}Starting loop"
+    for g in "${!good_users[@]}"; do
+        for c in "${!current_shell[@]}"; do
+            #DEBUG
+            echo -e "${warn}Checking user from good with current list"
+            if [[ "${good_users[g]}" == "${current_users[c]}" ]]; then
+                echo "${good}User ${good_users[g]} found!"
+                unset "good_users[g]"
+                unset "current_users[c]"
+                break
+            fi
+        done
+    done
+    echo -e "${good}Users have been compared. Current statistics below v"
+    echo -e "${warn}Missing ${green}good${nocolor} users: ${good_users[@]}"
+    echo -e "${warn}Extra ${red}shell${nocolor} users: ${current_users[@]}"
+
+    echo -e "${good}Adding missing users from userlist!"
+    for u in "${good_users[@]}"; do
+        useradd -m "$u"
+        [ $? == 0 ] && echo -e "${good}User $u added!" || echo -e "${error}User $u failed to add!"
+    done
+
+    if confirm "${prompt}Remove the extra shell users on the system? (${current_users[@]})"; then
+        for u in "${current_users[@]}"; do
+            userdel -r "$u"
+            [ $? == 0 ] && echo -e "${warn}User $u removed!" || echo -e "${error}User $u failed to remove!"
+        done
+    fi
+
+    if confirm "${prompt}Change all shell user passwords?"; then
+        echo -e "${warn}Changing all shell passwords to: $password_change"
+        for u in $(cat /etc/passwd | grep -E "/bin/.*sh" | cut -d: -f1); do
+            echo "$u:$password_change" | chpasswd;
+        done
+    fi
+
+    echo -e "${good}User audit complete. Moving on to group audit!"
 
 
 #########
