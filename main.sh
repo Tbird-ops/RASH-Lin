@@ -236,24 +236,40 @@ cp "/etc/sudoers" "/etc/sudoers-"
 
 echo -e "${good}Correcting root ownership and access permissions"
 #* passwd file
-chown root:root "/etc/passwd*"
-chmod 644 "/etc/passwd*"
+chown root:root "/etc/passwd"
+chmod 644 "/etc/passwd"
+
+chown root:root "/etc/passwd-"
+chmod 644 "/etc/passwd-"
+
 
 #* group file
-chown root:root "/etc/group*"
-chmod 644 "/etc/group*"
+chown root:root "/etc/group"
+chmod 644 "/etc/group"
+
+chown root:root "/etc/group-"
+chmod 644 "/etc/group-"
 
 #* shadow file
-chown root:shadow "/etc/shadow*"
-chmod 640 "/etc/shadow*"
+chown root:shadow "/etc/shadow"
+chmod 640 "/etc/shadow"
+
+chown root:shadow "/etc/shadow-"
+chmod 640 "/etc/shadow-"
 
 #* gshadow file
-chown root:shadow "/etc/gshadow*"
-chmod 640 "/etc/gshadow*"
+chown root:shadow "/etc/gshadow"
+chmod 640 "/etc/gshadow"
+
+chown root:shadow "/etc/gshadow-"
+chmod 640 "/etc/gshadow-"
 
 #* sudoers file and directory
-chown root:root "/etc/sudoers*"
-chmod 440 "/etc/sudoers*"
+chown root:root "/etc/sudoers"
+chmod 440 "/etc/sudoers"
+
+chown root:root "/etc/sudoers-"
+chmod 440 "/etc/sudoers-"
 
 chown -R root:root "/etc/sudoers.d/"
 chmod -R 440 "/etc/sudoers.d/"
