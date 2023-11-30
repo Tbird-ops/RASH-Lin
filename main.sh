@@ -144,7 +144,7 @@ if confirm "${prompt} Change repositories to DSU hosted collection?"; then
             echo "deb http://archive.debian.org/debian/ $os_version main contrib non-free" > $repos
             echo "deb http://archive.debian.org/debian/ $os_version-updates main contrib non-free" >> $repos
             echo "deb http://archive.debian.org/debian/ $os_version-security main contrib non-free" >> $repos
-
+        fi
 
     #* Fedora/RHEL format
     elif [[ "$os_id" == "fedora" ]]; then
