@@ -135,7 +135,7 @@ if confirm "${prompt} Change repositories to DSU hosted collection?"; then
         repos="/etc/apt/sources.list"
         cp "$repos" "$repos.bak"
         mv "$repos.d" "$repos.d.bak"
-        if [[ "$os_version" == "bookworm" || "$os_version" == "bullseye" || "$os_version" == "buster"]]; then
+        if [[ "$os_version" == "bookworm" || "$os_version" == "bullseye" || "$os_version" == "buster" ]]; then
             echo "deb http://repo.ialab.dsu.edu/debian/ $os_version main contrib non-free" > $repos
             echo "deb http://repo.ialab.dsu.edu/debian/ $os_version-updates main contrib non-free" >> $repos
             echo "deb http://repo.ialab.dsu.edu/debian/ $os_version-security main contrib non-free" >> $repos
@@ -283,7 +283,7 @@ if confirm "${prompt}Have you provided a user list already?"; then
     #DEBUG
     echo -e "${warn}Starting loop"
     for g in "${!good_users[@]}"; do
-        for c in "${!current_shell[@]}"; do
+        for c in "${!current_users[@]}"; do
             #DEBUG
             echo -e "${warn}Checking user from good with current list"
             if [[ "${good_users[g]}" == "${current_users[c]}" ]]; then
@@ -295,8 +295,8 @@ if confirm "${prompt}Have you provided a user list already?"; then
         done
     done
     echo -e "${good}Users have been compared. Current statistics below v"
-    echo -e "${warn}Missing ${green}good${nocolor} users: ${good_users[@]}"
-    echo -e "${warn}Extra ${red}shell${nocolor} users: ${current_users[@]}"
+    echo -e "${warn}Missing ${green}good${nocolor} users:" "${good_users[@]}"
+    echo -e "${warn}Extra ${red}shell${nocolor} users:" "${current_users[@]}"
 
     echo -e "${good}Adding missing users from userlist!"
     for u in "${good_users[@]}"; do
@@ -317,8 +317,9 @@ if confirm "${prompt}Have you provided a user list already?"; then
             echo "$u:$password_change" | chpasswd;
         done
     fi
+fi
 
-    echo -e "${good}User audit complete. Moving on to group audit!"
+echo -e "${good}User audit complete. Moving on to group audit!"
 
 
 #########
