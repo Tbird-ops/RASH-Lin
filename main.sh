@@ -258,6 +258,7 @@ if grep -E "^shadow" "/etc/group"; then
     chown root:shadow "/etc/gshadow-"
 
 else
+    echo -e "${warn}No shadow group. defaulting to root:root ownership."
     chown root:root "/etc/shadow"
     chown root:root "/etc/shadow-"
     chown root:root "/etc/gshadow"
@@ -280,9 +281,13 @@ chmod 440 "/etc/sudoers-"
 chown -R root:root "/etc/sudoers.d/"
 chmod -R 440 "/etc/sudoers.d/"
 cp -r "/etc/sudoers.d/" "/etc/sudoers.d-/"
-if confirm "${prompt}Remove includedir statement from sudoers?"; then
-    sed -i '/includedir/d'
-    echo -e "${warn}Removed includedir statements from active sudoers file"
+
+if grep -E "^.includedir" "/etc/sudoers"; then 
+    echo -e "${warn}Located an included sudoers directory."
+    if confirm "${prompt}Remove includedir statement from sudoers?"; then
+        sed -i '/includedir/d' /etc/sudoers
+        echo -e "${warn}Removed includedir statements from active sudoers file"
+    fi
 fi
 echo -e "${good}Finished with common account configuration files"
 
