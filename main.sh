@@ -208,11 +208,11 @@ if confirm "${prompt} Change repositories to DSU hosted collection?"; then
     fi
 
     # Attempt to refresh repository information
-    if which apt 2> /dev/null; then
+    if which apt > /dev/null; then
         echo -e "${good}Using 'apt' to update repositories...."
         apt-get update
         echo -e "${good}DONE!"
-    elif which dnf 2> /dev/null; then
+    elif which dnf > /dev/null; then
         echo -e "${good}Using 'dnf' to update repositories...."
         dnf check-update
         echo -e "${good}DONE!"
@@ -251,7 +251,7 @@ chown root:root "/etc/group-"
 chmod 644 "/etc/group-"
 
 #* (g)shadow files. Try root:shadow. Fallback root:root
-if grep -E "^shadow" "/etc/group"; then
+if grep -E "^shadow" "/etc/group" > /dev/null; then
     chown root:shadow "/etc/shadow"
     chown root:shadow "/etc/shadow-"
     chown root:shadow "/etc/gshadow"
@@ -306,8 +306,8 @@ echo -e "${good}Moving onto User Auditing"
 #* Collect roster of current existing shell users
 if confirm "${prompt}Perform user audit?";then
     if ! confirm "${prompt}Have you provided a user list already?"; then
-        if confirm "Enter users in file one username per line. Avoid additional spaces and new lines. When ready: send y and enter"; then
-            vim userlist.txt
+        if confirm "Enter users in file one username per line. Avoid additional spaces and new lines. \n\tWhen ready: send y and enter"; then
+            vi userlist.txt
         fi
     else
         echo -e "${good}Correcting users based on user list"
@@ -340,7 +340,8 @@ if confirm "${prompt}Perform user audit?";then
 
     if confirm "${prompt}Remove the unauthorized shell users on the system?"; then
         for u in "${current_users[@]}"; do
-            userdel -r "$u"
+            # remove user and pip errors to /dev/null (mostly mail errors)
+            userdel -r "$u" 2>/dev/null 
             [ $? == 0 ] && echo -e "${warn}User $u removed!" || echo -e "${error}User $u failed to remove!"
         done
     fi
