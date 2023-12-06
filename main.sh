@@ -294,17 +294,24 @@ echo -e "${good}Finished with common account configuration files"
 #########
 # Fix Users
 #########
+#########
+# Concept: Verify good users are in current.
+#          Remaining good users will be added
+#          Remaining current users will be removed.
+#########
 
 #!TODO audit Users, Admins, and Groups 
 echo -e "${good}Moving onto User Auditing"
 
 #* Collect roster of current existing shell users
-if confirm "${prompt}Have you provided a user list already?"; then
-    #########
-    # Concept: Verify good users are in current.
-    #          Remaining good users will be added
-    #          Remaining current users will be removed.
-    #########
+if confirm "${prompt}Perform user audit?";then
+    if ! confirm "${prompt}Have you provided a user list already?"; then
+        if confirm "Enter users in file one username per line. Avoid additional spaces and new lines. When ready: send y and enter"; then
+            vim userlist.txt
+        fi
+    else
+        echo -e "${good}Correcting users based on user list"
+    fi
     good_users=($(sort -u userlist.txt))
     current_users=($(cat /etc/passwd | grep -v root | grep -E "/bin/.*sh" | cut -d: -f1 | sort -u))
     #DEBUG
@@ -331,7 +338,7 @@ if confirm "${prompt}Have you provided a user list already?"; then
         [ $? == 0 ] && echo -e "${good}User $u added!" || echo -e "${error}User $u failed to add!"
     done
 
-    if confirm "${prompt}Remove the extra shell users on the system? (${current_users[@]})"; then
+    if confirm "${prompt}Remove the unauthorized shell users on the system?"; then
         for u in "${current_users[@]}"; do
             userdel -r "$u"
             [ $? == 0 ] && echo -e "${warn}User $u removed!" || echo -e "${error}User $u failed to remove!"
@@ -344,10 +351,12 @@ if confirm "${prompt}Have you provided a user list already?"; then
             echo "$u:$password_change" | chpasswd;
         done
     fi
+
+
+    echo -e "${good}User audit complete. Moving on to group audit!"
+else
+    echo -e "${warn}User audit skipped. Do this by hand later. Moving to group audid!"
 fi
-
-echo -e "${good}User audit complete. Moving on to group audit!"
-
 
 #########
 # Fix Sudoers
