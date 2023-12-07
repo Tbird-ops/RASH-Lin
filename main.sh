@@ -386,6 +386,8 @@ if confirm "${prompt}Perform admin audit?";then
     #TODO Make admin array
     good_admins=($(cat adminlist.txt))
     my_admins=$(printf "%s," "${good_admins[@]}")
+    #DEBUG
+    echo -e "${warn}Current my_admins var: ${my_admins}"
 
     if grep "sudo" /etc/group > /dev/null; then
         # Regex is looking for "sudo:x:#:[anything else for all the names]"
