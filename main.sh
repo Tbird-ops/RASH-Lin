@@ -64,13 +64,15 @@ password_change="Password1!"
 # Reminder Flags
 # If failure, turn on for end reminder
 ########
+#TODO Add more reminder flags for an closing reminder...
 repo_changed=0
 repo_update=0
+user_audit=0
 
 ########
 # Common Functions
 ########
-
+# credits @sour, thanks for a succinct confirmation prompt
 confirm() {
     while true; do
         echo -en "\t$1 (y/n): "
@@ -126,7 +128,7 @@ if confirm "${prompt} Change repositories to DSU hosted collection?"; then
         echo "deb http://repo.ialab.dsu.edu/ubuntu/ $os_version-security main restricted universe multiverse" >> $repos
 
 
-    #TODO Test that Debian format is working...
+    #TODO Test that Debian format is working... should be...
     #* Debian Format
     elif [[ "$os_id" == "debian" ]]; then
         echo -e "${good}This is believed to be ${green}DEBIAN${nocolor}. Now configuring sources.list and backing up old .list and .list.d"
@@ -300,7 +302,7 @@ echo -e "${good}Finished with common account configuration files"
 #          Remaining current users will be removed.
 #########
 
-#!TODO audit Users, Admins, and Groups 
+#!TODO audit Users and Admins
 echo -e "${good}Moving onto User Auditing"
 
 #* Collect roster of current existing shell users
@@ -309,9 +311,8 @@ if confirm "${prompt}Perform user audit?";then
         if confirm "Enter users in file one username per line. Avoid additional spaces and new lines. \n\tWhen ready: send y and enter"; then
             vi userlist.txt
         fi
-    else
-        echo -e "${good}Correcting users based on user list"
     fi
+    echo -e "${good}Correcting users based on user list"
     good_users=($(sort -u userlist.txt))
     current_users=($(cat /etc/passwd | grep -v root | grep -E "/bin/.*sh" | cut -d: -f1 | sort -u))
     #DEBUG
@@ -328,22 +329,31 @@ if confirm "${prompt}Perform user audit?";then
             fi
         done
     done
+
     echo -e "${good}Users have been compared. Current statistics below v"
-    echo -e "${warn}Missing ${green}good${nocolor} users:" "${good_users[@]}"
-    echo -e "${warn}${red}Unauthorized${nocolor} shell users:" "${current_users[@]}"
-
-    echo -e "${good}Adding missing users from userlist!"
-    for u in "${good_users[@]}"; do
-        useradd -m "$u"
-        [ $? == 0 ] && echo -e "${good}User $u added!" || echo -e "${error}User $u failed to add!"
-    done
-
-    if confirm "${prompt}Remove the unauthorized shell users on the system?"; then
-        for u in "${current_users[@]}"; do
-            # remove user and pip errors to /dev/null (mostly mail errors)
-            userdel -r "$u" 2>/dev/null 
-            [ $? == 0 ] && echo -e "${warn}User $u removed!" || echo -e "${error}User $u failed to remove!"
+    if [ ${#good_users[@]} -gt 1 ];then
+        echo -e "${warn}Missing ${green}good${nocolor} users:" "${good_users[@]}"
+        echo -e "${good}Adding missing users from userlist!"
+        for u in "${good_users[@]}"; do
+            useradd -m "$u"
+            [ $? == 0 ] && echo -e "${good}User $u added!" || echo -e "${error}User $u failed to add!"
         done
+    else
+        echo -e "${good}No missing users"
+    fi
+
+
+    if [ ${#current_users[@]} -gt 1 ];then
+        echo -e "${warn}${red}Unauthorized${nocolor} shell users:" "${current_users[@]}"
+        if confirm "${prompt}Remove the unauthorized shell users on the system?"; then
+            for u in "${current_users[@]}"; do
+                # remove user and pip errors to /dev/null (mostly mail errors)
+                userdel -r "$u" 2>/dev/null 
+                [ $? == 0 ] && echo -e "${warn}User $u removed!" || echo -e "${error}User $u failed to remove!"
+            done
+        fi
+    else  
+        echo -e "${good}No unauthorized users identified!"
     fi
 
     if confirm "${prompt}Change all shell user passwords?"; then
@@ -351,12 +361,47 @@ if confirm "${prompt}Perform user audit?";then
         for u in $(cat /etc/passwd | grep -E "/bin/.*sh" | cut -d: -f1); do
             echo "$u:$password_change" | chpasswd;
         done
+        echo -e "${warn}Changing root passwd. Prepare for prompt!"
+        passwd root
     fi
 
 
-    echo -e "${good}User audit complete. Moving on to group audit!"
+    echo -e "${good}User audit complete."
 else
-    echo -e "${warn}User audit skipped. Do this by hand later. Moving to group audid!"
+    echo -e "${warn}User audit skipped. Do this by hand later."
+    user_audit=1
+fi
+
+echo -e "${good}Moving on to admin audit!"
+
+#* Collect roster of current existing admin users
+if confirm "${prompt}Perform admin audit?";then
+    if ! confirm "${prompt}Have you provided a admin list already?"; then
+        if confirm "Enter admins in file one username per line. Avoid additional spaces and new lines. \n\tWhen ready: send y and enter"; then
+            vi adminlist.txt
+        fi
+    fi
+    echo -e "${good}Correcting admins based on user list"
+    
+    #TODO Make admin array
+    good_admins=($(cat adminlist.txt))
+    my_admins=$(printf "%s," "${good_admins[@]}")
+
+    if grep "sudo" /etc/group > /dev/null; then
+        # Regex is looking for "sudo:x:#:[anything else for all the names]"
+        # Capturing the statement prior to names in order to replace with exact number
+        sed -i "s/\(sudo:x:[[:digit:]]+:\).*/\1${my_admins}" /etc/group
+    elif grep "wheel" /etc/group > /dev/null; then
+        sed -i "s/\(wheel:x:[[:digit:]]+:\).*/\1${my_admins}" /etc/group
+    else
+        echo -e "${error}Did not find 'sudo' or 'wheel' group. Check admins by hand."
+        admin_audit=1
+    fi
+
+    echo -e "${good}Admin audit complete."
+else
+    echo -e "${warn}Admin audit skipped. Do this by hand later."
+    admin_audit=1
 fi
 
 #########
