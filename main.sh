@@ -392,9 +392,9 @@ if confirm "${prompt}Perform admin audit?";then
     if grep "sudo" /etc/group > /dev/null; then
         # Regex is looking for "sudo:x:#:[anything else for all the names]"
         # Capturing the statement prior to names in order to replace with exact number
-        sed -i "s/\(sudo:x:[[:digit:]]+:\).*/\1${my_admins}/" /etc/group
+        sed -i "s/\(sudo:x:[[:digit:]]*:\).*/\1${my_admins}/" /etc/group
     elif grep "wheel" /etc/group > /dev/null; then
-        sed -i "s/\(wheel:x:[[:digit:]]+:\).*/\1${my_admins}/" /etc/group
+        sed -i "s/\(wheel:x:[[:digit:]]*:\).*/\1${my_admins}/" /etc/group
     else
         echo -e "${error}Did not find 'sudo' or 'wheel' group. Check admins by hand."
         admin_audit=1
