@@ -463,3 +463,4 @@ if confirm "${prompt}Run automated firewall?";then
 else
     echo -e "${warn}Skipping firewall deployment. Recommend activating firewalls."
     firewalls_deployed=1
+fi
