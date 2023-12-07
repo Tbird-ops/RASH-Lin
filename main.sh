@@ -419,7 +419,7 @@ if confirm "${prompt}Audit sudoers file?"; then
     if grep -i nopasswd; then
         echo -e "${warn}Found ${red}NOPASSWD${nocolor}!"
         if confirm "${prompt}Remove NOPASSWD from line?";then
-            sed -i 's/\(.*NOPASSWD.*\)/#\1/g' /etc/sudoers
+            visudo
         else
             echo -e "${error}LEFT NOPASSWD IN SUDOERS. CHECK BY HAND!"
             sudoers_audit=1
