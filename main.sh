@@ -68,6 +68,8 @@ password_change="Password1!"
 repo_changed=0
 repo_update=0
 user_audit=0
+admin_audit=0
+sudoers_audit=0
 
 ########
 # Common Functions
@@ -302,7 +304,6 @@ echo -e "${good}Finished with common account configuration files"
 #          Remaining current users will be removed.
 #########
 
-#!TODO audit Users and Admins
 echo -e "${good}Moving onto User Auditing"
 
 #* Collect roster of current existing shell users
@@ -383,12 +384,12 @@ if confirm "${prompt}Perform admin audit?";then
     fi
     echo -e "${good}Correcting admins based on user list"
     
-    #TODO Make admin array
     good_admins=($(cat adminlist.txt))
     my_admins=$(printf "%s," "${good_admins[@]}")
     #DEBUG
     echo -e "${warn}Current my_admins var: ${my_admins}"
 
+    # Correct the entry for sudo or wheel in group and gshadow for provided admin list
     if grep "sudo" /etc/group > /dev/null; then
         # Regex is looking for "sudo:x:#:[anything else for all the names]"
         # Capturing the statement prior to names in order to replace with exact number
@@ -412,7 +413,28 @@ fi
 # Fix Sudoers
 #########
 
-#TODO Remove NOPASSWD and #include. Also verify other sudo and wheel members
+echo -e "${good}Moving to Sudoers file check."
+if confirm "${prompt}Audit sudoers file?"; then
+    echo -e "${good}Looking for NOPASSWD statements..."
+    if grep -i nopasswd; then
+        echo -e "${warn}Found ${red}NOPASSWD${nocolor}!"
+        if confirm "${prompt}Remove NOPASSWD from line?";then
+            sed -i 's/NOPASSWD.*//g' /etc/sudoers
+        else
+            echo -e "${error}LEFT NOPASSWD IN SUDOERS. CHECK BY HAND!"
+            sudoers_audit=1
+        fi
+    else
+        echo -e "${good}No NOPASSWD directives found!"
+    fi
+
+    echo -e "${good}Sudoers audit complete!"
+
+else
+    echo -e "${warn}Sudoers audit skipped. Do by hand later!"
+    sudoers_audit=1
+fi
+
 
 #########
 # Stand up Firewalls
