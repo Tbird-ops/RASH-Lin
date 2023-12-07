@@ -331,7 +331,7 @@ if confirm "${prompt}Perform user audit?";then
     done
 
     echo -e "${good}Users have been compared. Current statistics below v"
-    if [ ${#good_users[@]} -gt 1 ];then
+    if [ ${#good_users[@]} -gt 0 ];then
         echo -e "${warn}Missing ${green}good${nocolor} users:" "${good_users[@]}"
         echo -e "${good}Adding missing users from userlist!"
         for u in "${good_users[@]}"; do
@@ -343,7 +343,7 @@ if confirm "${prompt}Perform user audit?";then
     fi
 
 
-    if [ ${#current_users[@]} -gt 1 ];then
+    if [ ${#current_users[@]} -gt 0 ];then
         echo -e "${warn}${red}Unauthorized${nocolor} shell users:" "${current_users[@]}"
         if confirm "${prompt}Remove the unauthorized shell users on the system?"; then
             for u in "${current_users[@]}"; do
