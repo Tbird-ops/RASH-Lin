@@ -449,12 +449,10 @@ if confirm "${prompt}Run automated firewall?";then
     # Allow ping
     iptables -A INPUT -p icmp -j ACCEPT
     # Dynamically build input roster based on listening ports. (Currently not looking for malicious listeners)
-    for p in $(ss -pluntH); do
-        # regex to match capture TCP or UDP, then a port number. Builds 
-        echo $p | \
+    # regex to match capture TCP or UDP, then a port number. Builds 
+    ss -pluntH | \
         sed -r 's/(\S+).+:(\S+) .*"(.+)".*/-A INPUT -p \1 --dport \2\t -j ACCEPT -m comment --comment "\3"/g' | \
         xargs iptables
-    done
     # Allow currently established session traffic inbound and related new sessions.
     iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
     # Default policy DROP
