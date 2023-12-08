@@ -454,10 +454,10 @@ if confirm "${prompt}Run automated firewall?";then
     # regex to match capture TCP or UDP, then a port number. Builds 
     OLDIFS=$IFS
     IFS=$'\n'
-    for r in $(ss -pluntH | sed -r 's/(\S+).+:(\S+) .*:\*.*"(.+)".*/-A INPUT -p \1 --dport \2\t -j ACCEPT -m comment --comment "\3"/g'); do
+    for r in $(ss -pluntH | sed -r 's/(\S+).+:(\S+) .*:\*.*"(.+)".*/iptables -A INPUT -p \1 --dport \2\t -j ACCEPT -m comment --comment "\3"/g'); do
         # DEBUG
         echo -e "${warn}$r"
-        iptables "$r"
+        bash -c "$r"
     done
     IFS=$OLDIFS
     # Allow currently established session traffic inbound and related new sessions.
