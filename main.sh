@@ -471,8 +471,8 @@ if confirm "${prompt}Run automated firewall?";then
     # Default policy DROP
     echo -e "${warn}Setting inbound policy to ${yellow}DROP${nocolor}"
     iptables -P INPUT DROP
-    echo -e "${good}Saving rules to 'iptables_rules.txt'. You can edit and apply changes with 'iptables-restore < iptables_rules.txt'"
-    iptables-save > iptables_rules.txt
+    echo -e "${good}Saving rules to '/root/iptables_rules.txt'. You can edit and apply changes with 'iptables-restore < iptables_rules.txt'"
+    iptables-save > /root/iptables_rules.txt
 
     echo -e "${good}Generic inbound firewall established!"
     if confirm "See current iptables configuration?"; then
