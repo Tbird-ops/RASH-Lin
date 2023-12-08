@@ -474,6 +474,7 @@ if confirm "${prompt}Run automated firewall?";then
     echo -e "${good}Saving rules to '/root/iptables_rules.txt'. You can edit and apply changes with 'iptables-restore < iptables_rules.txt'"
     iptables-save > /root/iptables_rules.txt
 
+    #TODO make while loop?
     if confirm "${prompt}See current iptables configuration?"; then
         iptables-save
         if confirm "${prompt}Make changes to configuration?"; then
@@ -481,8 +482,10 @@ if confirm "${prompt}Run automated firewall?";then
             iptables-restore < /root/iptables_rules.txt
         fi
     fi
+
     if [ ! -f "/etc/systemd/system/iptables-persistent.service" ]; then
         if confirm "${prompt}Make iptables persistent?"; then
+            echo -e "${good}Making systemd service file"
             echo -e "[Unit]
             Description=Restore iptables on reboot
             After=network.target
@@ -494,8 +497,11 @@ if confirm "${prompt}Run automated firewall?";then
 
             [Install]
             WantedBy=multi-user.target" > /etc/systemd/system/iptables-persistent.service
+            echo -e "${good}Reloading daemons"
             systemctl daemon-reload
+            echo -e "${good}Enabling service on reboot"
             systemctl enable iptables-persistent
+            echo -e "${good}DONE!"
         fi
     fi
     echo -e "${good}Generic inbound firewall established!"
