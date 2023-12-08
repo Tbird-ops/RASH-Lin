@@ -443,6 +443,8 @@ fi
 
 echo -e "${good}Moving on to Firewalls"
 if confirm "${prompt}Run automated firewall?";then
+    iptables -F
+    iptables -X
     # Configure inbound firewall states
     # Allow loopback
     iptables -A INPUT -i lo -j ACCEPT
@@ -453,7 +455,8 @@ if confirm "${prompt}Run automated firewall?";then
     OLDIFS=$IFS
     IFS=$'\n'
     for r in $(ss -pluntH | sed -r 's/(\S+).+:(\S+) .*:\*.*"(.+)".*/-A INPUT -p \1 --dport \2\t -j ACCEPT -m comment --comment "\3"/g'); do
-        echo "$r"
+        # DEBUG
+        echo -e "${warn}$r"
         iptables "$r"
     done
     IFS=$OLDIFS
