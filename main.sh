@@ -31,8 +31,8 @@
 #   - Manual verification and edit
 #   - continue to next phase
 # Some common configuration file hardening
-#   - Harden SSH
-#   - Harden FTP
+#   - Harden SSH?
+#   - Harden FTP?
 # Updates and Upgrades!
 #   - Last segment of code will do this due to time requirement
 # Other subject to time allowance
@@ -481,4 +481,33 @@ if confirm "${prompt}Run automated firewall?";then
 else
     echo -e "${warn}Skipping firewall deployment. Recommend activating firewalls."
     firewalls_deployed=1
+fi
+
+######
+# REMINDERS: anything that flipped a flag for further investigation
+######
+echo -e "${good}Script complete..."
+echo -e "${warn}Recommend reviewing any content that appears below v"
+if [ repo_changed == 1 ]; then
+    echo -e "${prompt}Failed to change repository information. Verify integrity of repository information before updating!"
+fi
+
+if [ repo_update == 1 ]; then
+    echo -e "${prompt}Failed to pull updated repository information. Check that repositories are pointing to correct resources!"
+fi
+
+if [ user_audit == 1 ]; then
+    echo -e "${prompt}Skipped user audit. MAKE SURE YOUR USERS ARE GOOD!"
+fi
+
+if [ admin_audit == 1 ]; then
+    echo -e "${prompt}Skipped admin audit. VERIFY YOUR ADMINISTRATORS!"
+fi
+
+if [ sudoers_audit == 1 ]; then
+    echo -e "${prompt}Skipped sudoers audit. VERIFY SUDOER CONFIGURATION!"
+fi 
+
+if [ firewalls_deployed == 1 ]; then
+    echo -e "${prompt}Firewalls were not deployed. Deploy manually."
 fi
