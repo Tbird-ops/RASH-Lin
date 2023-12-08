@@ -417,7 +417,7 @@ fi
 echo -e "${good}Moving to Sudoers file check."
 if confirm "${prompt}Audit sudoers file?"; then
     echo -e "${good}Looking for NOPASSWD statements..."
-    if grep -i nopasswd; then
+    if grep -i nopasswd /etc/sudoers; then
         echo -e "${warn}Found ${red}NOPASSWD${nocolor}!"
         if confirm "${prompt}Remove NOPASSWD from line?";then
             visudo
