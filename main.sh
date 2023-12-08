@@ -31,11 +31,11 @@
 #   - Manual verification and edit
 #   - continue to next phase
 # Some common configuration file hardening
+# Other subject to time allowance
 #   - Harden SSH?
 #   - Harden FTP?
 # Updates and Upgrades!
 #   - Last segment of code will do this due to time requirement
-# Other subject to time allowance
 #######
 
 #######
@@ -474,10 +474,31 @@ if confirm "${prompt}Run automated firewall?";then
     echo -e "${good}Saving rules to '/root/iptables_rules.txt'. You can edit and apply changes with 'iptables-restore < iptables_rules.txt'"
     iptables-save > /root/iptables_rules.txt
 
-    echo -e "${good}Generic inbound firewall established!"
-    if confirm "See current iptables configuration?"; then
+    if confirm "${prompt}See current iptables configuration?"; then
         iptables-save
+        if confirm "${prompt}Make changes to configuration?"; then
+            vi /root/iptables_rules.txt
+            iptables-restore < /root/iptables_rules.txt
+        fi
     fi
+    if [ ! -f "/etc/systemd/system/iptables-persistent.service" ]; then
+        if confirm "${prompt}Make iptables persistent?"; then
+            echo -e "[Unit]
+            Description=Restore iptables on reboot
+            After=network.target
+
+            [Service]
+            Type=oneshot
+            ExecStart=/sbin/iptables-restore < /root/iptables_rules.txt
+            WorkingDirectory=/root
+
+            [Install]
+            WantedBy=multi-user.target" > /etc/systemd/system/iptables-persistent.service
+            systemctl daemon-reload
+            systemctl enable iptables-persistent
+        fi
+    fi
+    echo -e "${good}Generic inbound firewall established!"
 else
     echo -e "${warn}Skipping firewall deployment. Recommend activating firewalls."
     firewalls_deployed=1
