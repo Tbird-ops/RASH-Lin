@@ -464,7 +464,12 @@ if confirm "${prompt}Run automated firewall?";then
     iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
     # Default policy DROP
     iptables -P INPUT DROP
+    iptables-save > iptables_rules.txt
 
+    echo -e "${good}Generic inbound firewall established!"
+    if confirm "See current iptables configuration?"; then
+        iptables-save
+    fi
 else
     echo -e "${warn}Skipping firewall deployment. Recommend activating firewalls."
     firewalls_deployed=1
